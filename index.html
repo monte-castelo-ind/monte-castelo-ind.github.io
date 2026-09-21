@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monte Castelo</title>
+<script>try{var _t=localStorage.getItem('mc_portal_theme');if(_t==='dark'||_t==='light')document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#141414; --card:#1E1E1E; --card-2:#282828; --text:#EDEDED; --muted:#8C8C8C;
+  --border:rgba(255,255,255,.09); --primary:#F26B1F; --primary-soft:rgba(242,107,31,.13);
+  --green:#4CAF6A; --red:#E05252; --amber:#E8A33D;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.28);
+}
+html[data-theme="light"]{
+  --bg:#F2F0ED; --card:#FFFFFF; --card-2:#F7F5F2; --text:#1F1D1B; --muted:#7A756F;
+  --border:#E4E0DA; --primary:#D9550F; --primary-soft:rgba(217,85,15,.10);
+  --green:#2E8B4F; --red:#C93F3F; --amber:#C98A21;
+  --shadow:0 1px 2px rgba(0,0,0,.05), 0 10px 30px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Archivo',system-ui,sans-serif; font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:'JetBrains Mono',monospace}
+.wrap{max-width:980px;margin:0 auto;padding:34px 22px 60px}
+
+/* ---------- entrada ---------- */
+#entrar{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
+.cx-login{width:100%;max-width:360px;background:var(--card);border:1px solid var(--border);
+          border-radius:16px;padding:32px 30px;box-shadow:var(--shadow)}
+.marca{font-size:23px;font-weight:800;letter-spacing:-.5px;line-height:1.15;margin-bottom:3px}
+.marca em{font-style:normal;color:var(--primary)}
+.marca-sub{font-size:12.5px;color:var(--muted);margin-bottom:26px}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:0 0 6px}
+input[type=email],input[type=password]{
+  width:100%;background:var(--card-2);border:1px solid var(--border);color:var(--text);
+  border-radius:9px;padding:11px 12px;font-family:inherit;font-size:14.5px;margin-bottom:15px
+}
+input:focus{outline:2px solid var(--primary);outline-offset:-1px;border-color:var(--primary)}
+.btn{background:var(--primary);border:none;color:#fff;font-family:inherit;font-weight:700;
+     font-size:14.5px;padding:12px 18px;border-radius:9px;cursor:pointer;width:100%}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn-q{background:none;border:1px solid var(--border);color:var(--muted);font-weight:600;
+       font-size:12.5px;padding:7px 13px;border-radius:8px;cursor:pointer;width:auto}
+.btn-q:hover{border-color:var(--text);color:var(--text)}
+.lembrar{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:19px}
+.lembrar input{accent-color:var(--primary)}
+.erro{background:rgba(224,82,82,.12);border:1px solid rgba(224,82,82,.4);color:var(--red);
+      border-radius:9px;padding:10px 12px;font-size:13px;margin-bottom:15px;display:none}
+
+/* ---------- topo ---------- */
+.topo{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;
+      padding-bottom:20px;margin-bottom:28px;border-bottom:1px solid var(--border)}
+.topo h1{margin:0;font-size:27px;font-weight:800;letter-spacing:-.7px}
+.topo h1 em{font-style:normal;color:var(--primary)}
+.topo .saud{font-size:13.5px;color:var(--muted);margin-top:4px}
+.topo-dir{display:flex;align-items:center;gap:8px}
+
+/* ---------- apps ---------- */
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:13px}
+a.app{
+  display:block;text-decoration:none;color:inherit;background:var(--card);
+  border:1px solid var(--border);border-left:3px solid var(--primary);
+  border-radius:12px;padding:17px 18px 16px;transition:border-color .13s,transform .13s
+}
+a.app:hover{border-color:var(--primary);transform:translateY(-2px)}
+a.app:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.app-n{font-size:16.5px;font-weight:700;letter-spacing:-.2px;margin-bottom:5px}
+.app-d{font-size:13px;color:var(--muted);line-height:1.5}
+.app-tag{display:inline-block;margin-top:10px;font-size:10.5px;font-weight:700;
+         color:var(--amber);background:rgba(232,163,61,.12);border:1px solid rgba(232,163,61,.32);
+         border-radius:20px;padding:2px 9px}
+
+.sec{font-size:12.5px;font-weight:700;color:var(--muted);margin:32px 0 12px}
+.sem{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.sem p{margin:0 0 9px;font-size:13px;color:var(--muted);line-height:1.6}
+.sem-l{display:flex;flex-wrap:wrap;gap:7px}
+.sem-i{font-size:12.5px;color:var(--muted);background:var(--card-2);border:1px solid var(--border);
+       border-radius:8px;padding:5px 11px}
+
+.rodape{margin-top:34px;padding-top:16px;border-top:1px solid var(--border);
+        font-size:12px;color:var(--muted);display:flex;justify-content:space-between;
+        gap:12px;flex-wrap:wrap}
+.carregando{text-align:center;color:var(--muted);padding:70px 0;font-size:14px}
+
+@media (max-width:560px){
+  .wrap{padding:24px 16px 44px}
+  .topo h1{font-size:23px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ===== ENTRADA ===== -->
+<div id="entrar">
+  <form class="cx-login" id="form-login" autocomplete="on">
+    <div class="marca">Monte <em>Castelo</em></div>
+    <div class="marca-sub">Sistemas internos</div>
+
+    <div class="erro" id="erro"></div>
+
+    <label for="email">E-mail</label>
+    <input type="email" id="email" autocomplete="username" required>
+
+    <label for="senha">Senha</label>
+    <input type="password" id="senha" autocomplete="current-password" required>
+
+    <div class="lembrar">
+      <input type="checkbox" id="manter" checked>
+      <label for="manter" style="margin:0;font-weight:400;color:var(--muted)">Manter conectado neste computador</label>
+    </div>
+
+    <button class="btn" type="submit" id="btn-entrar">Entrar</button>
+  </form>
+</div>
+
+<!-- ===== PORTAL ===== -->
+<div class="wrap" id="portal" style="display:none">
+  <div class="topo">
+    <div>
+      <h1>Monte <em>Castelo</em></h1>
+      <div class="saud" id="saud">—</div>
+    </div>
+    <div class="topo-dir">
+      <button class="btn-q" onclick="trocarTema()" title="Claro ou escuro">Tema</button>
+      <button class="btn-q" onclick="sair()">Sair</button>
+    </div>
+  </div>
+
+  <div id="conteudo"><div class="carregando">Carregando seus acessos…</div></div>
+
+  <div class="rodape">
+    <span id="rod-user">—</span>
+    <span>Precisa de acesso a algum sistema? Fale com a diretoria.</span>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,
+         setPersistence, browserLocalPersistence, browserSessionPersistence }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* Mesmo projeto dos outros apps. Como todos rodam no mesmo domínio
+   (monte-castelo-ind.github.io) e no mesmo projeto Firebase, a sessão criada
+   aqui vale para eles também — quem entra no portal já entra logado no resto. */
+const cfg = {
+  apiKey:"AIzaSyCH_t074MvkJn-qVMvCtLfEMaQHf_e_d7M",
+  authDomain:"manutencao-comodato.firebaseapp.com",
+  projectId:"manutencao-comodato",
+  storageBucket:"manutencao-comodato.firebasestorage.app",
+  messagingSenderId:"89709396101",
+  appId:"1:89709396101:web:22ee225ffa806e07a269ec"
+};
+const app  = initializeApp(cfg);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+const BASE = 'https://monte-castelo-ind.github.io/';
+
+/* Cada app, a flag que libera, e o que a pessoa faz lá — descrito pelo que ela
+   entende, não pelo nome do módulo. */
+const APPS = [
+  { id:'gestao',     nome:'Gestão',            flag:'gestao',
+    desc:'Faturamento, metas, produção e os indicadores do mês.' },
+  { id:'logistica',  nome:'Frota e logística', flag:'frota',
+    desc:'Veículos, manutenção, conversão de caixas da expedição e estoque de pneus e óleos.' },
+  { id:'custos',     nome:'Custos',            flag:'custos',
+    desc:'Custo de cada produto, margem e simulação de cenários.' },
+  { id:'planner',    nome:'Planner',           flag:'planner',
+    desc:'Tarefas e demandas, com prazo e responsável.' },
+  { id:'compras',    nome:'Compras',           flag:'compras',
+    desc:'Requisições de compra e acompanhamento da aprovação.' },
+  { id:'dp',         nome:'Departamento Pessoal', flag:'dp',
+    desc:'Rotinas do DP e documentação dos funcionários.' },
+  { id:'campo',      nome:'Manutenção em Campo', flag:'campo',
+    desc:'Ordens de serviço dos técnicos em cliente.' },
+  { id:'manutencao', nome:'Comodato',          flag:'*',
+    desc:'Equipamentos em comodato: base, estoque e presenças.' },
+  { id:'predial',    nome:'Manutenção Predial', flag:'livre',
+    desc:'Abrir e acompanhar chamados de manutenção do prédio.',
+    aviso:'Entra com PIN do setor' }
+];
+
+const $ = id => document.getElementById(id);
+
+window.trocarTema = function(){
+  const at = document.documentElement.getAttribute('data-theme')==='light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', at);
+  try{ localStorage.setItem('mc_portal_theme', at); }catch(e){}
+};
+
+window.sair = function(){
+  signOut(auth).catch(e => console.error('sair:', e));
+};
+
+function mostrarErro(txt){
+  const e = $('erro');
+  e.textContent = txt;
+  e.style.display = txt ? 'block' : 'none';
+}
+
+$('form-login').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  mostrarErro('');
+  const b = $('btn-entrar');
+  b.disabled = true; b.textContent = 'Entrando…';
+  try{
+    await setPersistence(auth, $('manter').checked ? browserLocalPersistence : browserSessionPersistence);
+    await signInWithEmailAndPassword(auth, $('email').value.trim(), $('senha').value);
+  }catch(err){
+    console.error('login:', err);
+    const m = {
+      'auth/invalid-credential':'E-mail ou senha não conferem.',
+      'auth/invalid-email':'Esse e-mail não parece válido.',
+      'auth/user-disabled':'Esta conta está desativada. Fale com a diretoria.',
+      'auth/too-many-requests':'Muitas tentativas seguidas. Espere alguns minutos.',
+      'auth/network-request-failed':'Sem conexão com o servidor. Verifique a internet.'
+    }[err.code] || ('Não foi possível entrar: ' + (err.code || err.message));
+    mostrarErro(m);
+  }finally{
+    b.disabled = false; b.textContent = 'Entrar';
+  }
+});
+
+function saudacao(){
+  const h = new Date().getHours();
+  if(h < 12) return 'Bom dia';
+  if(h < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
+function papel(d){
+  if(d.role === 'admin') return 'Administrador';
+  if(d.role === 'operador') return 'Operador';
+  return 'Usuário';
+}
+
+function cartao(a){
+  return '<a class="app" href="' + BASE + a.id + '/">'
+       + '<div class="app-n">' + a.nome + '</div>'
+       + '<div class="app-d">' + a.desc + '</div>'
+       + (a.aviso ? '<span class="app-tag">' + a.aviso + '</span>' : '')
+       + '</a>';
+}
+
+function montar(dados){
+  const liberados = APPS.filter(a =>
+    a.flag === 'livre' || a.flag === '*' || dados[a.flag] === true || dados.role === 'admin');
+  const bloqueados = APPS.filter(a => liberados.indexOf(a) < 0);
+
+  let h = '';
+  if(liberados.length){
+    h += '<div class="grade">' + liberados.map(cartao).join('') + '</div>';
+  }else{
+    h += '<div class="sem"><p>Sua conta está ativa, mas ainda não tem acesso liberado a nenhum '
+       + 'sistema. Fale com a diretoria para liberar o que você precisa usar.</p></div>';
+  }
+
+  if(bloqueados.length){
+    h += '<div class="sec">Existem também, sem acesso liberado para você</div>'
+       + '<div class="sem"><p>Se precisar de algum destes para trabalhar, peça liberação à diretoria.</p>'
+       + '<div class="sem-l">' + bloqueados.map(a => '<span class="sem-i">' + a.nome + '</span>').join('') + '</div></div>';
+  }
+  $('conteudo').innerHTML = h;
+}
+
+onAuthStateChanged(auth, async u => {
+  if(!u){
+    $('entrar').style.display = 'flex';
+    $('portal').style.display = 'none';
+    return;
+  }
+  $('entrar').style.display = 'none';
+  $('portal').style.display = 'block';
+
+  let dados = {};
+  try{
+    const s = await getDoc(doc(db, 'usuarios', u.uid));
+    dados = s.exists() ? s.data() : {};
+  }catch(e){
+    console.error('usuarios:', e);
+    $('conteudo').innerHTML =
+      '<div class="sem"><p>Não foi possível ler suas permissões agora. '
+      + 'Recarregue a página; se continuar, avise a diretoria.</p></div>';
+    return;
+  }
+
+  const nome = dados.nome || u.email.split('@')[0];
+  $('saud').textContent = saudacao() + ', ' + nome + '.';
+  $('rod-user').textContent = u.email + ' · ' + papel(dados);
+
+  if(dados.ativo !== true){
+    $('conteudo').innerHTML =
+      '<div class="sem"><p>Sua conta ainda não foi ativada. Assim que a diretoria liberar, '
+      + 'os sistemas aparecem aqui.</p></div>';
+    return;
+  }
+  montar(dados);
+});
+</script>
+</body>
+</html>
