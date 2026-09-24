@@ -10,7 +10,7 @@
    app que tenha definido o próprio ícone. O ?v= força o navegador a trocar
    o ícone guardado em cache: ao mudar as imagens, suba o número. */
 (function(){
-  var B='https://monte-castelo-ind.github.io/', V='?v=4';
+  var B='https://monte-castelo-ind.github.io/', V='?v=5';
   var head=document.head || document.getElementsByTagName('head')[0];
   if(!head) return;
   function poe(rel, arquivo, tam, tipo){
