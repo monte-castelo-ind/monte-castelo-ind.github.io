@@ -1,8 +1,9 @@
 /* ===== Script compartilhado da suíte Monte Castelo =====
-   Todos os apps carregam este arquivo. Ele faz três coisas:
+   Todos os apps carregam este arquivo. Ele faz quatro coisas:
    1. coloca o ícone da Monte Castelo na aba e na tela inicial;
    2. mostra o botão "⌂ Apps" quando o app está aberto pelo ícone do celular;
-   3. avisa quando saiu uma versão nova do app aberto, com botão Atualizar.
+   3. avisa quando saiu uma versão nova do app aberto, com botão Atualizar;
+   4. faz o logo do menu levar para a lista de apps (menos no Produlog).
    Por morar num lugar só, trocar o ícone ou o botão é mexer só aqui e nas
    imagens da raiz — nenhum app precisa ser alterado. */
 
@@ -149,4 +150,44 @@
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) checar(); });
   window.addEventListener('pageshow', function(e){ if(e.persisted) checar(); });   /* voltou pelo botão voltar */
   window.mcChecarVersao = checar;               /* para teste no console */
+})();
+
+/* ---- 4. logo leva para a lista de apps ----
+   Clicar no logo da Monte Castelo (no menu do app) abre a lista de apps.
+   Fica de fora: o Produlog (mantido à parte), a própria lista, e os apps
+   abertos dentro da Gestão (iframe), onde o clique trocaria só o quadro.
+   Só os logos de menu: o da tela de login, o da tela de carregamento e o
+   da impressão não entram. Logos que aparecem depois do login são pegos
+   pelo observador. */
+(function(){
+  var HUB='https://monte-castelo-ind.github.io/';
+  var p=location.pathname;
+  if(/\/produlog(\/|$)/i.test(p)) return;
+  if(/^\/(index\.html)?$/.test(p) || /^\/hub\/?(index\.html)?$/.test(p)) return;
+  try{ if(window.self !== window.top) return; }catch(e){ return; }
+  var SEL='.brand-logo-box, .logo-mini, .mtopo-marca, .d-logo, .brand-logo-img, .brand[role="img"]';
+  function ligar(){
+    var els=document.querySelectorAll(SEL);
+    for(var i=0;i<els.length;i++){
+      var el=els[i];
+      if(el.getAttribute('data-mc-hub')) continue;
+      if(el.closest && el.closest('.auth-card, .auth, .login, #login, .loading, .print, .folha')) continue;
+      el.setAttribute('data-mc-hub','1');
+      el.style.cursor='pointer';
+      el.setAttribute('title','Voltar para a lista de apps');
+      el.addEventListener('click', function(e){
+        e.preventDefault(); e.stopImmediatePropagation();
+        location.href=HUB;
+      }, true);
+    }
+  }
+  function iniciar(){
+    ligar();
+    if(window.MutationObserver){
+      var t=null;
+      new MutationObserver(function(){ clearTimeout(t); t=setTimeout(ligar, 200); })
+        .observe(document.body, { childList:true, subtree:true });
+    }
+  }
+  if(document.body) iniciar(); else document.addEventListener('DOMContentLoaded', iniciar);
 })();
