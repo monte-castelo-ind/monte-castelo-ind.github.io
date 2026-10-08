@@ -11,9 +11,26 @@
    mc_tema ('claro'|'escuro'), mc_pal (paleta do claro), mc_menu ('lateral'
    para quem escolheu o lateral; qualquer outro valor = topo).
    Apps com muitos itens podem agrupar o menu definindo, antes de carregar a
-   página toda, window.MC_MENU_GRUPOS = [{nome:'Cadastros', ps:['a','b']}, {ps:['c']}]. */
+   página toda, window.MC_MENU_GRUPOS = [{nome:'Cadastros', ps:['a','b']}, {ps:['c']}].
+   Apps de outro molde descrevem o próprio menu ANTES de carregar este arquivo:
+     window.MC_UI = { lateral:'#sidebar', botoes:'.navbtn[data-p]', chave:'data-p',
+       rotulo:'.lbl' (null = texto do botão), ativo:'on', grupos:[…],
+       nome:'#uname', papel:'#urole', avatar:'#uavatar', sair:'sair',
+       funcsTema:['toggleTema'], funcsPaleta:['setPaleta'], paletaRow:'.paleta-row',
+       rodape:'.side-foot', alvo:'#desk' (elemento que também recebe tema/paleta),
+       soTema:true (escuro = o escuro do próprio app, sem a Neutro),
+       semBarra:true (só tema; sem menu no topo) }
+   Dentro de outro app (iframe, como na Gestão) só o tema é aplicado. */
 (function(){
   var D=document, H=D.documentElement;
+  var U=window.MC_UI||{};
+  var CFG={ lateral:U.lateral||'#sidebar', botoes:U.botoes||'.navbtn[data-p]', chave:U.chave||'data-p',
+            rotulo:('rotulo' in U)?U.rotulo:'.lbl', ativo:U.ativo||'on', grupos:U.grupos||null,
+            nome:U.nome||'#uname', papel:U.papel||'#urole', avatar:U.avatar||'#uavatar', sair:U.sair||'sair',
+            funcsTema:U.funcsTema||['toggleTema','toggleTheme'], funcsPaleta:U.funcsPaleta||['setPaleta'],
+            paletaRow:U.paletaRow||'.paleta-row', rodape:U.rodape||'.side-foot', alvo:U.alvo||null,
+            soTema:!!U.soTema, semBarra:!!U.semBarra };
+  var EMBUTIDO=false; try{ EMBUTIDO=(window.self!==window.top); }catch(e){ EMBUTIDO=true; }
   function ler(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function gravar(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
   var PALETAS=[['','Verde (original)','#2fae7d','#0f111a'],['mc','Monte Castelo','#F26B1F','#1A1A1A'],['aco','Aço','#4C8FBF','#12161C'],
@@ -23,11 +40,17 @@
   /* ---- 1. antes de desenhar: tema, paleta e menu ---- */
   function modoGuardado(){ return ler('mc_tema')==='escuro' ? 'escuro' : 'claro'; }
   function aplicarAtributos(m){
-    if(m==='escuro'){ H.setAttribute('data-theme','dark'); H.setAttribute('data-pal','ui'); }
-    else { H.setAttribute('data-theme','light'); var p=ler('mc_pal')||''; if(p) H.setAttribute('data-pal',p); else H.removeAttribute('data-pal'); }
+    var alvos=[H]; if(CFG.alvo) Array.prototype.forEach.call(D.querySelectorAll(CFG.alvo), function(e){ alvos.push(e); });
+    var p=ler('mc_pal')||'';
+    if(m==='escuro' && !CFG.soTema) p='ui';            /* escuro = preto da Neutro */
+    if(CFG.soTema && p==='ui') p='';                   /* app sem a Neutro: fica no padrão dele */
+    alvos.forEach(function(el){
+      el.setAttribute('data-theme', m==='escuro'?'dark':'light');
+      if(p) el.setAttribute('data-pal',p); else el.removeAttribute('data-pal');
+    });
   }
   aplicarAtributos(modoGuardado());
-  if(ler('mc_menu')!=='lateral') H.setAttribute('data-menu','topo');
+  if(ler('mc_menu')!=='lateral' && !CFG.semBarra && !EMBUTIDO) H.setAttribute('data-menu','topo');
   var st=D.createElement('style'); st.id='mc-ui-css'; st.textContent=`.paleta-box{padding:9px 4px 7px}
 .paleta-lab{font-size:9.5px;font-weight:700;letter-spacing:.7px;color:var(--muted);
             text-transform:uppercase;margin-bottom:7px;padding-left:2px}
@@ -147,7 +170,9 @@ html[data-pal="ui"][data-theme="dark"] .rz-bts button.rz-pos-on,
 html[data-pal="ui"][data-theme="dark"] .rz-base .btn.rz-pos-on,
 html[data-pal="ui"][data-theme="dark"] .rz-dia.on,
 html[data-pal="ui"][data-theme="dark"] .filtro-badge,
-html[data-pal="ui"][data-theme="dark"] .filtro-grupo-n{color:#0a0a0a}
+html[data-pal="ui"][data-theme="dark"] .filtro-grupo-n,
+html[data-pal="ui"][data-theme="dark"] .chip.active,
+html[data-pal="ui"][data-theme="dark"] .tb button.on{color:#0a0a0a}
 html[data-pal="ui"] .btn-ghost{background:var(--card-2);border-color:transparent}
 html[data-pal="ui"] .btn-ghost:hover{border-color:var(--border)}
 html[data-pal="ui"] input,html[data-pal="ui"] select{border-radius:18px;border-color:transparent;background:var(--card-2)}
@@ -206,6 +231,23 @@ html[data-menu="topo"] .mtopo{display:block;position:sticky;top:0;z-index:60;hei
 .mtopo-lua:hover{background:var(--card-2)}
 html[data-menu="topo"] .pinbtn{display:none}
 .mc-topo-btn{width:100%;margin-top:8px}
+/* itens da barra e das listas com estilo próprio (apps de outro molde não têm .navbtn) */
+.mtopo .mdrop .navbtn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 11px;border:0;border-radius:9px;background:none;
+  color:var(--muted);font:500 13.5px inherit;font-family:inherit;text-align:left;cursor:pointer;white-space:nowrap}
+.mtopo .mdrop .navbtn:hover{background:var(--card-2);color:var(--text)}
+.mtopo .mdrop .navbtn.on{background:var(--side-active,var(--card-2));color:var(--side-active-text,var(--text));font-weight:600}
+.mtopo .mdrop .navbtn .side-ico{display:inline-block;width:22px;flex:0 0 22px;text-align:center}
+.mtopo .mdrop .navbtn .lbl{opacity:1}
+.mtopo .uav{width:29px;height:29px;flex:0 0 29px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+html[data-pal="ui"][data-theme="dark"] .mtopo .uav{color:#0a0a0a}
+.mc-topo-btn{font:inherit;cursor:pointer;padding:7px 10px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text)}
+html[data-menu="topo"] .mc-com-barra{flex-wrap:wrap;align-content:flex-start}
+html[data-menu="topo"] .mc-com-barra>.mtopo{flex:0 0 100%;width:100%}
+html[data-menu="topo"] .mc-com-barra>:not(.mtopo):not([data-mc-lateral]){min-width:100%}
+@media(min-width:901px){
+  html[data-menu="topo"] [data-mc-lateral]{display:none!important}
+  html[data-menu="topo"] main{margin-left:0!important}
+}
 `;
   (D.head||H).appendChild(st);
 
@@ -214,15 +256,20 @@ html[data-menu="topo"] .pinbtn{display:none}
   function aplicarModo(m){
     aplicarAtributos(m); gravar('mc_tema', m);
     var p=ler('mc_pal')||'', esc=(m==='escuro');
-    D.querySelectorAll('.pbola').forEach(function(b){ b.classList.toggle('on', !esc && (b.getAttribute('data-pal')||'')===p); });
+    D.querySelectorAll('.pbola,.d-pbola').forEach(function(b){ b.classList.toggle('on', !esc && (b.getAttribute('data-pal')||'')===p); });
     var lua=D.getElementById('mtopoLua');
     if(lua){ lua.textContent=esc?'☀':'☾'; lua.title=esc?'Voltar ao modo claro':'Modo escuro'; }
+    if(typeof ajustarLogo==='function') setTimeout(ajustarLogo,0);
   }
   window.mcAplicarModo=aplicarModo;
   function instalarFuncoes(){
-    window.toggleTema=function(){ aplicarModo(modoAtual()==='escuro'?'claro':'escuro'); };
+    var alternar=function(){ aplicarModo(modoAtual()==='escuro'?'claro':'escuro'); };
+    var paleta=function(p){ gravar('mc_pal', p||''); aplicarModo('claro'); };
+    window.toggleTema=alternar;
+    CFG.funcsTema.forEach(function(n){ window[n]=alternar; });
     window.applyTheme=function(t){ aplicarModo(t==='dark'?'escuro':'claro'); };
-    window.setPaleta=function(p){ gravar('mc_pal', p||''); aplicarModo('claro'); };
+    window.setPaleta=paleta;
+    CFG.funcsPaleta.forEach(function(n){ window[n]=paleta; });
     window.setMenuTopo=function(on){
       if(on) H.setAttribute('data-menu','topo'); else H.removeAttribute('data-menu');
       gravar('mc_menu', on?'topo':'lateral'); fecharListas(); sincronizar();
@@ -236,18 +283,18 @@ html[data-menu="topo"] .pinbtn{display:none}
 
   /* ---- 3. menu lateral: paletas iguais em todos e botão "Menu no topo" ---- */
   function prepararLateral(side){
-    var row=side.querySelector('.paleta-row');
+    var row=side.querySelector(CFG.paletaRow);
     if(!row){
-      var foot=side.querySelector('.side-foot'); if(!foot) return;
+      var foot=side.querySelector(CFG.rodape); if(!foot) return;
       var box=D.createElement('div'); box.className='paleta-box lbl';
       box.innerHTML='<div class="paleta-lab">Paleta</div><div class="paleta-row"></div>';
-      var alvo=foot.querySelector('button[onclick*="toggleTema"]');
+      var alvo=foot.querySelector(CFG.funcsTema.concat(['toggleTema']).map(function(n){ return 'button[onclick*="'+n+'"]'; }).join(','));
       alvo=alvo ? alvo.parentElement : null;
       if(alvo && alvo.parentElement===foot) foot.insertBefore(box, alvo); else foot.appendChild(box);
       row=box.querySelector('.paleta-row');
     }
     row.innerHTML=bolinhas();
-    if(!side.querySelector('.mc-topo-btn')){
+    if(!side.querySelector('.mc-topo-btn') && !CFG.semBarra){
       var b=D.createElement('button'); b.className='btn btn-sm btn-ghost mc-topo-btn';
       b.setAttribute('onclick','setMenuTopo(true)'); b.title='Trocar o menu lateral por uma barra no topo'; b.textContent='⇡ Menu no topo';
       row.parentElement.appendChild(b);
@@ -257,18 +304,35 @@ html[data-menu="topo"] .pinbtn{display:none}
   /* ---- 4. barra do topo ---- */
   var side=null, mapa=[];                       /* [{clone, orig, solto}] */
   function limparIds(html){ return String(html).replace(/\sid="[^"]*"/g,''); }
+  var BASES=['navbtn','nav-item','d-nav','on','active'];
+  function chaveDe(b,i){ return b.getAttribute(CFG.chave) || b.id || ('item'+i); }
+  function rotuloDe(b){
+    var l=CFG.rotulo ? b.querySelector(CFG.rotulo) : null;
+    if(l) return limparIds(l.innerHTML);
+    var c=b.cloneNode(true);
+    Array.prototype.forEach.call(c.querySelectorAll('.ico,.side-ico,.d-ico,.chevron,.nav-badge,.cnt,.d-dot,.lab-m'), function(x){ x.remove(); });
+    return limparIds(c.innerHTML).trim();
+  }
+  function classesDe(b){ return Array.prototype.filter.call(b.classList, function(c){ return BASES.indexOf(c)<0; }).join(' '); }
+  function novoItem(o, base, html){
+    var c=D.createElement('button'); c.type='button'; c.className=base+' '+classesDe(o); c.innerHTML=html;
+    c.addEventListener('click', function(e){ e.preventDefault(); fecharListas(); o.click(); });
+    return c;
+  }
   function montarBarra(){
-    side=D.getElementById('sidebar'); if(!side) return;
-    var orig=Array.prototype.slice.call(side.querySelectorAll('.navbtn[data-p]'));
+    if(CFG.semBarra || EMBUTIDO) return;
+    side=D.querySelector(CFG.lateral); if(!side) return;
+    var orig=Array.prototype.slice.call(side.querySelectorAll(CFG.botoes));
     if(!orig.length) return;
-    var porP={}; orig.forEach(function(b){ porP[b.getAttribute('data-p')]=b; });
-    var grupos=window.MC_MENU_GRUPOS;
+    side.setAttribute('data-mc-lateral','1');
+    var porP={}; orig.forEach(function(b,i){ porP[chaveDe(b,i)]=b; });
+    var grupos=CFG.grupos || window.MC_MENU_GRUPOS;     /* lido só agora: o app pode definir depois de carregar este arquivo */
     if(!grupos){
-      var ps=orig.map(function(b){ return b.getAttribute('data-p'); });
+      var ps=orig.map(function(b,i){ return chaveDe(b,i); });
       grupos = ps.length<=6 ? ps.map(function(p){ return { ps:[p] }; })
              : ps.slice(0,4).map(function(p){ return { ps:[p] }; }).concat([{ nome:'Mais', ps:ps.slice(4) }]);
     }
-    var cap=side.querySelector('.brand-cap'), capTxt=cap?cap.textContent.trim():'';
+    var cap=side.querySelector('.brand-cap,.d-cap'), capTxt=cap?cap.textContent.trim():'';
     var hd=D.createElement('header'); hd.className='mtopo'; hd.id='mtopo';
     hd.innerHTML='<div class="mtopo-in">'
       +'<div class="mtopo-marca" title="Voltar para a lista de apps"><div class="mtopo-logo brand-logo-box"></div>'+(capTxt?'<span class="mtopo-cap"></span>':'')+'</div>'
@@ -279,10 +343,11 @@ html[data-menu="topo"] .pinbtn{display:none}
       +    '<div class="mdrop mdrop-dir"><div class="mtopo-quem"><b id="mtopoNome">—</b><small id="mtopoPapel">—</small></div>'
       +      '<div class="paleta-lab" style="margin:8px 8px 6px">Paleta</div><div class="paleta-row" style="padding:0 8px 8px">'+bolinhas()+'</div>'
       +      '<button class="navbtn" onclick="setMenuTopo(false)"><span class="side-ico">▥</span><span class="lbl">Voltar ao menu lateral</span></button>'
-      +      '<button class="navbtn" onclick="window.sair&&sair()"><span class="side-ico">⎋</span><span class="lbl">Sair</span></button>'
+      +      '<button class="navbtn" id="mtopoSair"><span class="side-ico">⎋</span><span class="lbl">Sair</span></button>'
       +  '</div></div>'
       +'</div></div>';
     if(capTxt) hd.querySelector('.mtopo-cap').textContent=capTxt;
+    hd.querySelector('#mtopoSair').addEventListener('click', function(){ var f=window[CFG.sair]; if(typeof f==='function') f(); });
     hd.querySelector('.mtopo-marca').addEventListener('click', function(){ location.href='https://monte-castelo-ind.github.io/'; });
     var nav=hd.querySelector('#mtopoNav');
     grupos.forEach(function(g){
@@ -290,8 +355,7 @@ html[data-menu="topo"] .pinbtn{display:none}
       if(!bs.length) return;
       if(!g.nome){
         bs.forEach(function(o){
-          var c=D.createElement('button'); c.className='mlink'; c.setAttribute('onclick', o.getAttribute('onclick')||'');
-          var l=o.querySelector('.lbl'); c.innerHTML=limparIds(l?l.innerHTML:o.textContent);
+          var c=novoItem(o, 'mlink', rotuloDe(o));
           nav.appendChild(c); mapa.push({ clone:c, orig:o, solto:true });
         });
         return;
@@ -301,43 +365,61 @@ html[data-menu="topo"] .pinbtn{display:none}
       gr.querySelector('.mlink').innerHTML=g.nome.replace(/[<>&]/g,'')+' <span class="mcar">▾</span>';
       var dr=gr.querySelector('.mdrop');
       bs.forEach(function(o){
-        var c=o.cloneNode(true); c.removeAttribute('id'); Array.prototype.forEach.call(c.querySelectorAll('[id]'), function(x){ x.removeAttribute('id'); });
+        var ic=o.querySelector('.side-ico,.ico,.d-ico');
+        var c=novoItem(o, 'navbtn', (ic?'<span class="side-ico">'+limparIds(ic.innerHTML)+'</span>':'')+'<span class="lbl">'+rotuloDe(o)+'</span>');
         dr.appendChild(c); mapa.push({ clone:c, orig:o, grupo:gr });
       });
       nav.appendChild(gr);
     });
     /* a barra entra logo antes do bloco que contém o menu lateral (.shell),
        que fica dentro da área que só aparece depois do login */
+    /* A barra fica DENTRO da área que só aparece depois do login:
+       - molde da Logística (.shell): logo antes da .shell;
+       - menu e conteúdo lado a lado (flex em linha): primeira coisa dentro do
+         bloco, que passa a quebrar linha para a barra ocupar a largura toda;
+       - nos outros casos: primeira coisa dentro do bloco. */
     var bloco=side.parentNode;
-    if(bloco && bloco!==D.body && bloco.parentNode) bloco.parentNode.insertBefore(hd, bloco);
-    else side.parentNode.insertBefore(hd, side);
+    if(bloco.classList.contains('shell') && bloco.parentNode) bloco.parentNode.insertBefore(hd, bloco);
+    else {
+      bloco.classList.add('mc-com-barra');       /* só tem efeito se o bloco for flex (pode estar escondido antes do login) */
+      bloco.insertBefore(hd, bloco.firstChild);
+    }
     if(window.MutationObserver){
       var t=null, agendar=function(){ clearTimeout(t); t=setTimeout(sincronizar, 60); };
       new MutationObserver(agendar).observe(side, { attributes:true, childList:true, subtree:true, characterData:true });
-      ['uname','urole','uavatar'].forEach(function(id){ var e=D.getElementById(id); if(e) new MutationObserver(agendar).observe(e,{ childList:true, characterData:true, subtree:true }); });
+      [CFG.nome,CFG.papel,CFG.avatar].forEach(function(sel){ var e=D.querySelector(sel); if(e) new MutationObserver(agendar).observe(e,{ childList:true, characterData:true, subtree:true }); });
     }
     sincronizar();
   }
   /* copia do menu lateral: visibilidade, tela ativa, contadores; esconde grupo vazio */
   function sincronizar(){
     mapa.forEach(function(m){
-      var o=m.orig, c=m.clone, vis=o.style.display!=='none' && !o.hidden;
-      if(m.solto){ c.style.display=vis?'':'none'; c.classList.toggle('on', o.classList.contains('on')); }
-      else {
-        c.className=o.className; c.style.display=vis?'':'none';
-        var h=limparIds(o.innerHTML); if(c.innerHTML!==h) c.innerHTML=h;
-      }
+      var o=m.orig, c=m.clone;
+      c.className=(m.solto?'mlink':'navbtn')+' '+classesDe(o);       /* mesmas classes de permissão do original */
+      c.classList.toggle('on', o.classList.contains(CFG.ativo));
+      c.style.display=(o.style.display==='none' || o.hidden) ? 'none' : '';
     });
     D.querySelectorAll('#mtopoNav .mc-grupo').forEach(function(g){
       var its=mapa.filter(function(m){ return m.grupo===g; });
-      var vis=its.filter(function(m){ return m.clone.style.display!=='none'; });
+      var vis=its.filter(function(m){ return getComputedStyle(m.clone).display!=='none'; });
       g.style.display=vis.length?'':'none';
-      g.querySelector('.mlink').classList.toggle('on', vis.some(function(m){ return m.orig.classList.contains('on'); }));
+      g.querySelector('.mlink').classList.toggle('on', vis.some(function(m){ return m.orig.classList.contains(CFG.ativo); }));
     });
-    var av=D.getElementById('uavatar'), n=D.getElementById('uname'), r=D.getElementById('urole');
+    var av=D.querySelector(CFG.avatar), n=D.querySelector(CFG.nome), r=D.querySelector(CFG.papel);
     var a2=D.getElementById('mtopoAv'); if(a2 && av) a2.textContent=av.textContent;
     var n2=D.getElementById('mtopoNome'); if(n2 && n) n2.textContent=n.textContent;
-    var r2=D.getElementById('mtopoPapel'); if(r2 && r) r2.textContent=r.textContent;
+    var r2=D.getElementById('mtopoPapel'); if(r2) r2.textContent=r?r.textContent:'';
+    ajustarLogo();
+  }
+  /* logo da barra: se o app não usa o desenho padrão (.brand-logo-box), copia o
+     do próprio menu lateral (.brand, .d-brand…), na versão do tema atual */
+  function ajustarLogo(){
+    var l=D.querySelector('.mtopo .mtopo-logo'); if(!l || !side) return;
+    l.style.backgroundImage='';
+    if(getComputedStyle(l).backgroundImage!=='none') return;
+    var o=side.querySelector('.brand-logo-box, .brand, .d-brand, .brand-logo-img'); if(!o) return;
+    var img = o.tagName==='IMG' ? 'url("'+o.src+'")' : getComputedStyle(o).backgroundImage;
+    if(img && img!=='none'){ l.style.backgroundImage=img; l.style.backgroundRepeat='no-repeat'; l.style.backgroundSize='contain'; }
   }
   function fecharListas(){ D.querySelectorAll('.mgrupo.aberto').forEach(function(x){ x.classList.remove('aberto'); }); }
   window.mcAbrir=function(ev,id){
@@ -354,8 +436,8 @@ html[data-menu="topo"] .pinbtn{display:none}
        do próprio app (que vem depois na página), quem vem por último ganha */
     var est=D.getElementById('mc-ui-css'); if(est && D.head) D.head.appendChild(est);
     instalarFuncoes();                          /* por cima das funções de tema de cada app */
-    var s=D.getElementById('sidebar');
-    if(s) prepararLateral(s);
+    var s=D.querySelector(CFG.lateral);
+    if(s && !EMBUTIDO) prepararLateral(s);
     montarBarra();
     aplicarModo(modoGuardado());
   }
