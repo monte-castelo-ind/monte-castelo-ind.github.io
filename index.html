@@ -183,6 +183,8 @@ var APPS=[
     flag:'custos',  desc:'Custo de produto, receitas, simulação e folha' },
   { id:'compras',   nome:'Compras',           url:'compras/',             ico:'◇', cor:'var(--blue)',
     flag:'compras', desc:'Requisições de compra e aprovação' },
+  { id:'comercial', nome:'Comercial',          url:'comercial/',           ico:'◎', cor:'var(--red)',
+    flag:'comercial', desc:'Carteira de clientes, visitas e pedidos dos vendedores' },
   { id:'autorizacao', nome:'Autorizações',     url:'autorizacao/',         ico:'✍', cor:'var(--primary)',
     flag:'assinaturas', desc:'Autorização de compra: pedido, assinatura da diretoria e Pix' },
   { id:'logistica', nome:'Frota',             url:'logistica/',           ico:'⛟', cor:'var(--green)',
@@ -306,6 +308,7 @@ function linkApp(caminho){
 var ICO={
   assinar:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 17c3-1 5-6 7-6s1 5 3 5 3-3 5-3 2 2 3 2"></path><path d="M3 21h18"></path></svg>',
   pix:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2.5"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path></svg>',
+  pedido:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M3 7l9 6 9-6"></path></svg>',
   relogio:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>'
 };
 function cartaoHoje(o){
@@ -327,10 +330,11 @@ function carregaHoje(){
   Promise.all([
     lerComCuidado(query(collection(dbC,'assinaturas'), where('status','==','pendente'), limit(200))),
     lerComCuidado(query(collection(dbC,'assinaturas'), where('status','==','aprovado'), where('pix','==',true), limit(200))),
-    lerComCuidado(query(collection(dbC,'pecasPedidos'), where('status','==','aguardando_fin'), limit(200)))
+    lerComCuidado(query(collection(dbC,'pecasPedidos'), where('status','==','aguardando_fin'), limit(200))),
+    lerComCuidado(query(collection(dbC,'comSolicitacoes'), where('status','==','aberta'), limit(200)))
   ]).then(function(r){
     hojeCarregando=false;
-    var pend=r[0], pix=r[1]?r[1].filter(function(d){ return !d.pixPago; }):null, ped=r[2];
+    var pend=r[0], pix=r[1]?r[1].filter(function(d){ return !d.pixPago; }):null, ped=r[2], sol=r[3];
     var cards=[], destaque='', falhou=[];
 
     if(pend===null) falhou.push('autorizações');
@@ -362,11 +366,22 @@ function carregaHoje(){
         sub:nomes(ped.map(function(d){ return d.fornecedor; }),3)+' · o mais antigo '+quandoTxt(maisAntigo(ped,'criadoEm'),'criado') }));
     }
 
+    /* solicitações do app Comercial esperando resposta (preço, bonificação, equipamento…) */
+    if(sol===null) falhou.push('solicitações do comercial');
+    else if(sol.length){
+      var TIP={ preco:'preço', bonificacao:'bonificação', equipamento:'equipamento', outro:'outro' };
+      cards.push(cartaoHoje({ app:'comercial/', ico:ICO.pedido, cor:'var(--amber)',
+        fundo:'color-mix(in srgb,var(--amber) 20%,transparent)',
+        titulo:sol.length+(sol.length===1?' solicitação do comercial em aberto':' solicitações do comercial em aberto'),
+        sub:nomes(sol.map(function(d){ return (TIP[d.tipo]||d.tipo)+(d.clienteNome?' · '+d.clienteNome:''); }),2)
+            +' · a mais antiga '+quandoTxt(maisAntigo(sol,'criadoEm'),'chegou') }));
+    }
+
     /* o de assinar ocupa a linha inteira; os demais dividem a largura entre si */
     alvo.innerHTML='<div class="sect">Depende de você</div>'
       + (destaque ? '<div class="hj-lista">'+destaque+'</div>' : '')
       + (cards.length ? '<div class="hj-lista">'+cards.join('')+'</div>' : '')
-      + (!destaque && !cards.length && falhou.length<3 ? '<div class="hj-ok">Nada esperando por você agora.</div>' : '')
+      + (!destaque && !cards.length && falhou.length<4 ? '<div class="hj-ok">Nada esperando por você agora.</div>' : '')
       + (falhou.length ? '<div class="hj-erro">Não consegui ler: '+falhou.join(', ')+'.</div>' : '');
   });
 }
