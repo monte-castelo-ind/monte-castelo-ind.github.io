@@ -16,6 +16,8 @@
   }
   injetaCSS();
   var SERV={ entregar:'Entregar / instalar', retirar:'Retirar', trocar:'Trocar', consertar:'Consertar no cliente' };
+  /* tipo do pedido (marcado no app Comercial) */
+  var CAT={ remessa:'Remessa / retorno', externa:'Manutenção externa' };
   var SELO={ autorizacao:['AGUARDA AUTORIZAÇÃO','#b45309'], aberta:['ABERTA','#b7791f'], separacao:['EM SEPARAÇÃO','#1d4ed8'],
     entregue:['ENTREGUE','#1f6b45'], cancelada:['CANCELADA','#555'], recusada:['RECUSADA','#b91c1c'] };
   function esc(t){ return String(t==null?'':t).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -55,12 +57,12 @@
       +  '<tr><td><b>Entrega programada:</b> '+dataBR(s.dataProgramada)+'</td><td><span class="f-selo" style="color:'+selo[1]+'">'+selo[0]+'</span></td></tr>'+linhaAut(s)+'</table>'
       +'<div class="f-sec">DADOS DO CLIENTE</div>'
       +'<table class="f-dados">'
-      +  '<tr><td><b>Cliente:</b> '+esc(s.cliente||'')+'</td><td><b>Contato:</b> '+esc(s.contato||'—')+'</td></tr>'
+      +  '<tr><td><b>Cliente:</b> '+esc(s.cliente||'')+(s.clienteNovo?' <b>(cliente novo)</b>':'')+'</td><td><b>Contato:</b> '+esc(s.contato||'—')+'</td></tr>'
       +  '<tr><td colspan="2" style="width:auto"><b>Endereço:</b> '+esc(s.endereco||'—')+'</td></tr>'
-      +  '<tr><td><b>Cidade:</b> '+esc(s.cidade||'—')+'</td><td><b>Cód. no ERP:</b> '+esc(s.clienteId||'—')+'</td></tr></table>'
+      +  '<tr><td><b>Cidade:</b> '+esc(s.cidade||'—')+'</td><td><b>Cód. no ERP:</b> '+esc(s.clienteId||(s.clienteNovo?'ainda não cadastrado':'—'))+'</td></tr></table>'
       +'<table class="f-itens"><thead><tr><th style="width:7%">ITEM</th><th style="width:9%">QTDE</th><th>EQUIPAMENTO</th>'
       +  '<th style="width:22%">PATRIMÔNIO</th><th style="width:20%">SERVIÇO</th></tr></thead><tbody>'
-      +  '<tr><td class="c">1</td><td class="c">'+(s.quantidade||1)+'</td><td>'+eq+'</td><td>'+esc(s.patrimonio||'')+'</td><td>'+esc(SERV[s.servico]||s.servico||'')+'</td></tr>'
+      +  '<tr><td class="c">1</td><td class="c">'+(s.quantidade||1)+'</td><td>'+eq+'</td><td>'+esc(s.patrimonio||'')+'</td><td>'+esc((s.categoria&&CAT[s.categoria]?CAT[s.categoria]+' · ':'')+(SERV[s.servico]||s.servico||''))+'</td></tr>'
       +  vazias+'</tbody></table>'
       +'<div class="f-sec">OBSERVAÇÃO</div><div class="f-obs">'+(obs||'&nbsp;')+'</div>'
       +'<div class="f-sec">ANDAMENTO</div><div class="f-hist">'+((s.historico||[]).map(function(h){
