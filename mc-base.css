@@ -1,0 +1,88 @@
+/* =====================================================================
+   mc-base.css — base visual dos apps da Monte Castelo (molde da Logística)
+   Raiz do hub: https://monte-castelo-ind.github.io/mc-base.css?v=1
+
+   COMO USAR NUM APP
+   1. No <head>, DEPOIS do <style> do app:
+        <link rel="stylesheet" href="https://monte-castelo-ind.github.io/mc-base.css?v=1">
+   2. No elemento que carrega o tema (data-theme="dark|light"), declarar a área:
+        <html data-mc="logistica" data-theme="dark">   (ou no contêiner do app)
+      Áreas: comercial · logistica · manutencao · producao · financeiro · pessoas · diretoria
+   3. Usar as variáveis abaixo no CSS do app (--bg, --card, --primary…).
+      A cor da área chega em --area / --primary / --side-active.
+
+   Os valores levam !important de propósito: vencem as cores antigas que
+   cada app ainda tem no próprio <style> (elas ficam só de reserva, caso
+   este arquivo não carregue). Para trocar uma cor em TODOS os apps, muda
+   aqui e sobe o ?v= nos apps.
+   ===================================================================== */
+
+/* ---------- cor de cada área (decidido em 04/11/2026) ---------- */
+[data-mc="comercial"]  { --area:#e0303d !important; --area-rgb:224,48,61 !important; }
+[data-mc="logistica"]  { --area:#ff6a13 !important; --area-rgb:255,106,19 !important; }
+[data-mc="manutencao"] { --area:#1f9d6b !important; --area-rgb:31,157,107 !important; }
+[data-mc="producao"]   { --area:#3b6ef5 !important; --area-rgb:59,110,245 !important; }
+[data-mc="financeiro"] { --area:#8b5cf6 !important; --area-rgb:139,92,246 !important; }
+[data-mc="pessoas"]    { --area:#12a39a !important; --area-rgb:18,163,154 !important; }
+[data-mc="diretoria"]  { --area:#c9a227 !important; --area-rgb:201,162,39 !important; }
+
+/* ---------- escuro (padrão) ---------- */
+[data-mc]{
+  --bg:#0f0f11 !important; --sidebar:#151517 !important; --card:#19191c !important; --card-2:#222226 !important;
+  --campo:#121214 !important; --border:#2a2a2f !important; --text:#f1f1f3 !important; --muted:#8d8d95 !important;
+  --track:rgba(255,255,255,.07) !important;
+  /* situação: âmbar = aberto/pendente · azul = em andamento · verde = concluído · vermelho = atrasado/recusado */
+  --amber:#e8b33f !important; --green:#3fbf86 !important; --red:#f0605a !important; --blue:#5aa9ff !important; --purple:#a78bfa !important;
+  --primary:var(--area) !important; --side-active:var(--area) !important; --side-active-text:#ffffff !important;
+  --prim-sombra:rgba(var(--area-rgb),.32) !important; --prim-suave:rgba(var(--area-rgb),.12) !important;
+  --shadow:none !important; --sombra-pop:0 18px 50px rgba(0,0,0,.55) !important;
+}
+
+/* ---------- claro suave (cinza no lugar do branco: cansa menos a vista) ---------- */
+[data-mc][data-theme="light"]{
+  --bg:#e6e7eb !important; --sidebar:#eeeff2 !important; --card:#f4f4f6 !important; --card-2:#e9eaee !important;
+  --campo:#fafafb !important; --border:#d6d8de !important; --text:#1b1c21 !important; --muted:#5f626c !important;
+  --track:rgba(20,20,40,.08) !important;
+  --amber:#a86c12 !important; --green:#1d7d53 !important; --red:#c43c38 !important; --blue:#2a63c4 !important; --purple:#7a5af0 !important;
+  --prim-sombra:rgba(var(--area-rgb),.22) !important; --prim-suave:rgba(var(--area-rgb),.10) !important;
+  --shadow:0 1px 2px rgba(20,20,40,.06),0 8px 24px rgba(20,20,40,.05) !important; --sombra-pop:0 18px 50px rgba(20,20,40,.18) !important;
+}
+
+/* ---------- fonte: Archivo "mais encorpada" ----------
+   Texto normal em peso 500 (400 ficava fino, principalmente no claro).
+   :where() = sem força nenhuma: qualquer peso que o app definir (rótulos 600,
+   títulos 700, números 800) continua valendo; só muda o que estava no padrão. */
+:where([data-mc]), :where([data-mc] body), :where([data-mc] button, [data-mc] input, [data-mc] select, [data-mc] textarea){
+  font-weight:500;
+}
+:where([data-mc]) :where(b, strong){ font-weight:700; }
+
+/* ---------- topo: botão claro/escuro ---------- */
+[data-mc] .luabtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);
+  font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;flex:0 0 34px}
+[data-mc] .luabtn:hover{border-color:var(--primary)}
+
+/* ---------- topo: aviso ⚠ com a lista de pendências ----------
+   HTML:
+   <div class="warnwrap" id="warnWrap">
+     <button class="warnbtn" id="warnBtn" onclick="toggleAvisos(event)" title="Pendências">&#9888;<span class="warnbadge" id="warnBadge">0</span></button>
+     <div class="warnpop" id="warnPop"></div>
+   </div>
+   O app liga a classe .has quando há pendências e .open ao clicar. */
+[data-mc] .warnwrap{position:relative;display:none}
+[data-mc] .warnwrap.has{display:block}
+[data-mc] .warnbtn{position:relative;background:none;border:none;padding:3px 5px;line-height:1;font-size:17px;color:var(--amber);border-radius:8px;cursor:pointer}
+[data-mc] .warnbtn:hover{background:rgba(232,179,63,.14)}
+[data-mc] .warnbadge{position:absolute;top:-2px;right:-4px;background:var(--amber);color:#1a1400;font-size:9.5px;font-weight:700;min-width:14px;height:14px;line-height:14px;border-radius:8px;padding:0 3px;text-align:center;font-family:'Archivo',system-ui,sans-serif}
+[data-mc] .warnpop{display:none;position:absolute;top:calc(100% + 8px);right:0;width:340px;max-width:78vw;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--sombra-pop);z-index:90;text-align:left;max-height:70vh;overflow-y:auto}
+[data-mc] .warnwrap:hover .warnpop,[data-mc] .warnwrap.open .warnpop{display:block}
+[data-mc] .warnpop-h{padding:9px 13px;border-bottom:1px solid var(--border);font-size:10.5px;font-weight:700;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+[data-mc] .warnitem{display:flex;gap:9px;padding:10px 13px;border-bottom:1px solid var(--border);cursor:pointer}
+[data-mc] .warnitem:last-child{border-bottom:none}
+[data-mc] .warnitem:hover{background:var(--card-2)}
+[data-mc] .warndot{width:6px;height:6px;border-radius:50%;flex:0 0 6px;margin-top:6px}
+[data-mc] .warntit{font-size:12.5px;font-weight:600;line-height:1.35;color:var(--text)}
+[data-mc] .warnsub{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+
+/* ---------- números alinhados em coluna ---------- */
+[data-mc] .num{font-variant-numeric:tabular-nums}
