@@ -24,7 +24,8 @@
     '.mcp-tools input{flex:1 1 240px!important}',
     '.mcp-tools .mcp-novo{margin-left:auto;height:38px;padding:0 16px;border-radius:9px;border:none;background:var(--primary,#e23b3b);color:#fff;font:inherit;font-weight:700;font-size:13px;cursor:pointer}',
     '.mcp-dica{font-size:12px;color:var(--muted,#999);margin:0 0 10px;min-height:2px}',
-    '.mcp-wrap{overflow:auto;max-height:calc(100vh - 300px);min-height:200px;border:1px solid var(--border,#333);border-radius:12px;background:var(--card,#1b1b1f)}',
+    /* sem altura máxima: a lista segue a rolagem da página (uma barra só) */
+    '.mcp-wrap{overflow-x:auto;border:1px solid var(--border,#333);border-radius:12px;background:var(--card,#1b1b1f)}',
     'table.mcp-tab{width:100%;border-collapse:collapse;font-size:13.5px;color:var(--text,#eee)}',
     'table.mcp-tab th{position:sticky;top:0;z-index:1;background:var(--card-2,#232328)!important;color:var(--muted,#999)!important;font-size:10.5px!important;font-weight:700!important;letter-spacing:.06em!important;text-transform:uppercase!important;text-align:left;padding:10px 12px!important;border:none!important;border-bottom:1px solid var(--border,#333)!important;white-space:nowrap!important}',
     'table.mcp-tab td{padding:10px 12px!important;vertical-align:top!important;border:none!important;border-bottom:1px solid var(--border,#333)!important;white-space:nowrap!important;font-size:13.5px!important;line-height:1.45!important;color:var(--text,#eee)}',
